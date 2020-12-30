@@ -1,0 +1,9 @@
+name: Disenchantments
+version: ${project.version}
+main: xyz.monology.disenchantments.Disenchantments
+api-version: 1.16
+commands:
+  disenchant:
+    description: The command for disenchanting tools.
+  disenchantments:
+    description: The administrative command for Disenchantments.
