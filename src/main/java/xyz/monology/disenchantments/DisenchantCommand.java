@@ -6,27 +6,49 @@ import org.bukkit.enchantments.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
-import org.bukkit.inventory.meta.Damageable;
+import org.bukkit.permissions.*;
 
 import java.util.*;
+import java.util.regex.*;
 
-public class DisenchantCommand implements CommandExecutor {
+public class DisenchantCommand implements CommandExecutor, TabCompleter {
+    private static Pattern ENCHANTMENT_PATTERN = Pattern.compile("[a-z0-9/._-]+");
+
+    private final Disenchantments plugin;
+
+    public DisenchantCommand(Disenchantments plugin) {
+        this.plugin = plugin;
+    }
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length != 1) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cInvalid usage: /disenchant [enchantment]"));
+            sender.sendMessage(Disenchantments.error("Invalid usage: /disenchant [enchantment]"));
             return true;
         }
 
         if (!(sender instanceof Player)) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYou must be a player to execute this command."));
+            sender.sendMessage(Disenchantments.error("You must be a player to execute this command."));
             return true;
         }
 
         Player player = (Player) sender;
+        Inventory inventory = player.getInventory();
 
-        if (player.getInventory().firstEmpty() == -1) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYour inventory is full."));
+        if (inventory.firstEmpty() == -1) {
+            sender.sendMessage(Disenchantments.error("Your inventory is full."));
+            return true;
+        }
+
+        if (!player.hasPermission("disenchantments.use.nobook") && !inventory.contains(Material.BOOK)) {
+            sender.sendMessage(Disenchantments.error("You need to a book in your inventory to disenchant an item."));
+            return true;
+        }
+
+        String argument = args[0];
+
+        if (argument.length() > 256 || !ENCHANTMENT_PATTERN.matcher(argument).matches()) {
+            sender.sendMessage(Disenchantments.error("The specified enchantment does not exist."));
             return true;
         }
 
@@ -34,44 +56,58 @@ public class DisenchantCommand implements CommandExecutor {
         Enchantment enchantment = Enchantment.getByKey(NamespacedKey.minecraft(args[0]));
 
         if (enchantment == null) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cThe specified enchantment does not exist."));
+            sender.sendMessage(Disenchantments.error("The specified enchantment does not exist."));
             return true;
         }
 
         Map<Enchantment, Integer> enchantments = item.getEnchantments();
 
         if (!enchantments.containsKey(enchantment)) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYour tool does not have the specified enchantment."));
+            sender.sendMessage(Disenchantments.error("Your item does not have the specified enchantment."));
             return true;
         }
 
         int level = enchantments.get(enchantment);
+        int experience = level * plugin.getExperienceFactor();
 
-        item.removeEnchantment(enchantment);
-
-        ItemMeta meta = item.getItemMeta();
-
-        if (meta instanceof Damageable) {
-            Damageable damageable = (Damageable) meta;
-            damageable.setDamage(damageable.getDamage() - level * 50);
-        } else {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYour tool is not damageable, and therefore may not have its enchantments stripped."));
+        if (player.getLevel() < experience) {
+            sender.sendMessage(Disenchantments.error("You do not have enough experience levels to disenchant your item. You need " + (experience - player.getLevel()) + " more experience level(s)."));
             return true;
         }
 
-        item.setItemMeta(meta);
+        item.removeEnchantment(enchantment);
+
+        player.getInventory().remove(new ItemStack(Material.BOOK));
 
         ItemStack enchantmentBookItemStack = new ItemStack(Material.ENCHANTED_BOOK);
-        ItemMeta enchantmentBookMeta = enchantmentBookItemStack.getItemMeta();
+        EnchantmentStorageMeta enchantmentBookMeta = (EnchantmentStorageMeta) enchantmentBookItemStack.getItemMeta();
 
-        enchantmentBookMeta.addEnchant(enchantment, level, true);
+        enchantmentBookMeta.addStoredEnchant(enchantment, level, true);
 
         enchantmentBookItemStack.setItemMeta(enchantmentBookMeta);
 
         player.getInventory().addItem(enchantmentBookItemStack);
 
-        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&a"));
+        player.setLevel(player.getLevel() - experience);
+
+        player.sendMessage(Disenchantments.info("The item was disenchanted, and an enchantment book has been placed in your inventory."));
 
         return true;
+    }
+
+    @Override
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (!(sender instanceof Player)) return Collections.emptyList();
+
+        Player player = (Player) sender;
+
+        Set<Enchantment> enchantments = player.getInventory().getItemInMainHand().getEnchantments().keySet();
+
+        List<String> enchantmentNames = new ArrayList<>();
+        for (Enchantment enchantment : enchantments) {
+            enchantmentNames.add(enchantment.getKey().getKey());
+        }
+
+        return enchantmentNames;
     }
 }

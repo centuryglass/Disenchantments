@@ -1,5 +1,5 @@
 name: Disenchantments
-version: ${project.version}
+version: 1.0
 main: xyz.monology.disenchantments.Disenchantments
 api-version: 1.16
 commands:
