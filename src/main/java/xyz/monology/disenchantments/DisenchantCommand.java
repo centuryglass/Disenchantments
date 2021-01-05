@@ -42,10 +42,11 @@ public class DisenchantCommand implements CommandExecutor, TabCompleter {
 
         if (plugin.isMcMMOInstalled()) {
             if (MCMMOController.isUserUsingAbility(player)) {
-                sender.sendMessage(Disenchantments.error("No  mcMMO abilities must be active to execute this command"));
+                sender.sendMessage(Disenchantments.error("You may not execute this command while mcMMO abilities are active."));
                 return true;
             }
         }
+        
         if (inventory.firstEmpty() == -1) {
             sender.sendMessage(Disenchantments.error("Your inventory is full."));
             return true;
@@ -93,7 +94,7 @@ public class DisenchantCommand implements CommandExecutor, TabCompleter {
         ItemStack enchantmentBookItemStack = new ItemStack(Material.ENCHANTED_BOOK);
         EnchantmentStorageMeta enchantmentBookMeta = (EnchantmentStorageMeta) enchantmentBookItemStack.getItemMeta();
 
-        enchantmentBookMeta.addStoredEnchant(enchantment, level, true);
+        enchantmentBookMeta.addStoredEnchant(enchantment, level, false);
 
         enchantmentBookItemStack.setItemMeta(enchantmentBookMeta);
 
