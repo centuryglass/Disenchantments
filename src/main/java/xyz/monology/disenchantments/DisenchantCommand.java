@@ -1,15 +1,20 @@
 package xyz.monology.disenchantments;
 
-import org.bukkit.*;
-import org.bukkit.command.*;
-import org.bukkit.enchantments.*;
-import org.bukkit.entity.*;
-import org.bukkit.inventory.*;
-import org.bukkit.inventory.meta.*;
-import org.bukkit.permissions.*;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import xyz.monology.disenchantments.mcmmo.MCMMOController;
 
 import java.util.*;
-import java.util.regex.*;
+import java.util.regex.Pattern;
 
 public class DisenchantCommand implements CommandExecutor, TabCompleter {
     private static Pattern ENCHANTMENT_PATTERN = Pattern.compile("[a-z0-9/._-]+");
@@ -35,6 +40,12 @@ public class DisenchantCommand implements CommandExecutor, TabCompleter {
         Player player = (Player) sender;
         Inventory inventory = player.getInventory();
 
+        if (plugin.isMcMMOInstalled()) {
+            if (MCMMOController.isUserUsingAbility(player)) {
+                sender.sendMessage(Disenchantments.error("No  mcMMO abilities must be active to execute this command"));
+                return true;
+            }
+        }
         if (inventory.firstEmpty() == -1) {
             sender.sendMessage(Disenchantments.error("Your inventory is full."));
             return true;

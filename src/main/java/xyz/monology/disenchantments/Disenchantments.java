@@ -1,11 +1,18 @@
 package xyz.monology.disenchantments;
 
-import org.bukkit.*;
-import org.bukkit.command.*;
+import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-public final class Disenchantments extends JavaPlugin {
+public final class Disenchantments extends JavaPlugin implements Listener {
     private int experienceFactor;
+    public boolean mcMMOInstalled;
 
     @Override
     public void onEnable() {
@@ -17,7 +24,12 @@ public final class Disenchantments extends JavaPlugin {
 
         saveDefaultConfig();
         reloadConfig();
+        Bukkit.getPluginManager().registerEvents(this, this);
+        if (Bukkit.getPluginManager().isPluginEnabled("mcMMO")) {
+            mcMMOInstalled = true;
+        }
     }
+
 
     @Override
     public void reloadConfig() {
@@ -27,6 +39,17 @@ public final class Disenchantments extends JavaPlugin {
 
     public int getExperienceFactor() {
         return experienceFactor;
+    }
+
+    @EventHandler
+    public void onPluginEnable(PluginEnableEvent e) {
+        if (e.getPlugin().getName().equals("mcMMO")) {
+            mcMMOInstalled = true;
+        }
+    }
+
+    public boolean isMcMMOInstalled() {
+        return mcMMOInstalled;
     }
 
     private void addCommand(String name, String permission, CommandExecutor commandExecutor, TabCompleter tabCompleter) {
