@@ -2,6 +2,8 @@ name: Disenchantments
 version: 1.0
 main: xyz.monology.disenchantments.Disenchantments
 api-version: 1.16
+softdepend:
+  - mcMMO
 commands:
   disenchant:
     description: The command for disenchanting tools.

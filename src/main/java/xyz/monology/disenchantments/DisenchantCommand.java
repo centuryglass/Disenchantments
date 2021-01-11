@@ -1,11 +1,13 @@
 package xyz.monology.disenchantments;
 
+import com.gmail.nossr50.api.*;
 import org.bukkit.*;
 import org.bukkit.command.*;
 import org.bukkit.enchantments.*;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.*;
 import org.bukkit.inventory.meta.*;
+import org.jetbrains.annotations.*;
 
 import java.util.*;
 import java.util.regex.*;
@@ -20,7 +22,7 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
         if (args.length < 1) {
             sender.sendMessage(Disenchantments.error("Invalid usage: /disenchant [enchantments... | 'all']"));
             return true;
@@ -33,6 +35,11 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
 
         Player player = (Player) sender;
         PlayerInventory inventory = player.getInventory();
+
+        if (plugin.getServer().getPluginManager().isPluginEnabled("mcMMO") && AbilityAPI.isAnyAbilityEnabled(player)) {
+            player.sendMessage(Disenchantments.error("You may not disenchant an item while using an mcMMO ability."));
+            return true;
+        }
 
         if (inventory.firstEmpty() == -1) {
             sender.sendMessage(Disenchantments.error("Your inventory is full."));
@@ -82,25 +89,26 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
             return true;
         }
 
-        Repairable meta;
-        if (item.getItemMeta() instanceof Repairable) {
-            meta = (Repairable) item.getItemMeta();
+        Repairable repairableMeta;
+        ItemMeta meta = item.getItemMeta();
+        if (meta instanceof Repairable) {
+            repairableMeta = (Repairable) meta;
         } else {
-            meta = null;
+            repairableMeta = null;
         }
 
         int num = enchantments.size();
         for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
             if (inventory.firstEmpty() == -1) {
                 player.sendMessage(Disenchantments.error("There are no more empty slots in your inventory."));
-                if (meta != null) item.setItemMeta((ItemMeta) meta);
+                if (meta != null) item.setItemMeta(meta);
                 return true;
             }
 
             if (player.getGameMode() != GameMode.CREATIVE) {
                 if (!inventory.contains(Material.BOOK)) {
                     sender.sendMessage(Disenchantments.error("You need " + num + " more book(s) in your inventory to disenchant this item."));
-                    if (meta != null) item.setItemMeta((ItemMeta) meta);
+                    if (meta != null) item.setItemMeta(meta);
                     return true;
                 }
 
@@ -111,14 +119,14 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
             }
 
             System.out.println(entry.getKey());
-            item.removeEnchantment(entry.getKey());
+            meta.removeEnchant(entry.getKey());
             inventory.addItem(makeEnchantedBook(entry.getKey(), entry.getValue()));
-            if (meta != null) meta.setRepairCost(meta.getRepairCost() - 1);
+            if (repairableMeta != null) repairableMeta.setRepairCost((repairableMeta.getRepairCost() - 1) / 2);
 
             num--;
         }
 
-        if (meta != null) item.setItemMeta((ItemMeta) meta);
+        item.setItemMeta(meta);
 
         player.sendMessage(Disenchantments.info("The item was disenchanted."));
 
@@ -142,7 +150,7 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
         if (args.length == 1 && args[0].equals("all")) {
             return Collections.emptyList();
         }
