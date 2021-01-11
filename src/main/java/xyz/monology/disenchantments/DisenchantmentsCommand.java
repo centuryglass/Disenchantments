@@ -1,12 +1,10 @@
 package xyz.monology.disenchantments;
 
 import org.bukkit.command.*;
-import org.bukkit.enchantments.*;
-import org.bukkit.entity.*;
 
 import java.util.*;
 
-public class DisenchantmentsCommand implements CommandExecutor, TabCompleter {
+public final class DisenchantmentsCommand implements CommandExecutor, TabCompleter {
     private static final List<String> TAB_COMPLETIONS = new ArrayList<>();
 
     static {

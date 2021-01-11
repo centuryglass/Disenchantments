@@ -5,7 +5,8 @@ import org.bukkit.command.*;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class Disenchantments extends JavaPlugin {
-    private int experienceFactor;
+    private double experienceFactor;
+    private boolean ignoreLevelRestriction;
 
     @Override
     public void onEnable() {
@@ -22,11 +23,16 @@ public final class Disenchantments extends JavaPlugin {
     @Override
     public void reloadConfig() {
         super.reloadConfig();
-        experienceFactor = getConfig().getInt("experienceFactor");
+        experienceFactor = getConfig().getDouble("experienceFactor");
+        ignoreLevelRestriction = getConfig().getBoolean("ignoreLevelRestriction");
     }
 
-    public int getExperienceFactor() {
+    public double getExperienceFactor() {
         return experienceFactor;
+    }
+
+    public boolean isIgnoreLevelRestriction() {
+        return ignoreLevelRestriction;
     }
 
     private void addCommand(String name, String permission, CommandExecutor commandExecutor, TabCompleter tabCompleter) {
