@@ -25,7 +25,7 @@ public final class DisenchantmentsCommand implements CommandExecutor, TabComplet
             return true;
         }
 
-        sender.sendMessage(Disenchantments.info("Disenchantments version 1.0"));
+        sender.sendMessage(Disenchantments.info("Disenchantments version 1.1"));
         sender.sendMessage(Disenchantments.info("&f/disenchantments reload &7- Reloads the plugin configuration."));
         sender.sendMessage(Disenchantments.info("&f/disenchant [enchantment] &7- Strips an enchantment from an item."));
 
