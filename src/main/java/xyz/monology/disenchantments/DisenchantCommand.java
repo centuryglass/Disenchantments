@@ -1,16 +1,24 @@
 package xyz.monology.disenchantments;
 
-import com.gmail.nossr50.api.*;
-import org.bukkit.*;
-import org.bukkit.command.*;
-import org.bukkit.enchantments.*;
-import org.bukkit.entity.*;
-import org.bukkit.inventory.*;
-import org.bukkit.inventory.meta.*;
-import org.jetbrains.annotations.*;
+import com.gmail.nossr50.api.AbilityAPI;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.EnchantmentStorageMeta;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.Repairable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.regex.*;
+import java.util.regex.Pattern;
 
 public final class DisenchantCommand implements CommandExecutor, TabCompleter {
     private static final Pattern ENCHANTMENT_PATTERN = Pattern.compile("[a-z0-9/._-]+");
@@ -22,27 +30,29 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
+                             String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(Disenchantments.error("Invalid usage: /disenchant [enchantments... | 'all']"));
+            sender.sendMessage(plugin.getLocaleEntry(0));
             return true;
         }
 
         if (!(sender instanceof Player)) {
-            sender.sendMessage(Disenchantments.error("You must be a player to execute this command."));
+            sender.sendMessage(plugin.getLocaleEntry(1));
             return true;
         }
 
         Player player = (Player) sender;
         PlayerInventory inventory = player.getInventory();
 
-        if (plugin.getServer().getPluginManager().isPluginEnabled("mcMMO") && AbilityAPI.isAnyAbilityEnabled(player)) {
-            player.sendMessage(Disenchantments.error("You may not disenchant an item while using an mcMMO ability."));
+        if (plugin.getServer().getPluginManager().isPluginEnabled("mcMMO") &&
+                AbilityAPI.isAnyAbilityEnabled(player)) {
+            player.sendMessage(plugin.getLocaleEntry(2));
             return true;
         }
 
         if (inventory.firstEmpty() == -1) {
-            sender.sendMessage(Disenchantments.error("Your inventory is full."));
+            sender.sendMessage(plugin.getLocaleEntry(3));
             return true;
         }
 
@@ -75,7 +85,7 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
         int level = 0;
         for (Enchantment enchantment : enchantments.keySet()) {
             if (!itemStackEnchantments.containsKey(enchantment)) {
-                player.sendMessage(Disenchantments.error("Your item does not have the \"" + enchantment.getKey().getKey() + "\" enchantment."));
+                player.sendMessage(plugin.getLocaleEntry(4).replace("{0}", enchantment.getKey().getKey()));
                 return true;
             }
 
@@ -85,7 +95,8 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
         int experience = (int) (level * plugin.getExperienceFactor());
 
         if (player.getGameMode() != GameMode.CREATIVE && player.getLevel() < experience) {
-            player.sendMessage(Disenchantments.error("You do not have enough experience levels to disenchant your item. You need " + (experience - player.getLevel()) + " more experience level(s)."));
+            player.sendMessage(plugin.getLocaleEntry(5).replace("{0}",
+                    Integer.toString(experience - player.getLevel())));
             return true;
         }
 
@@ -100,26 +111,26 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
         int num = enchantments.size();
         for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
             if (inventory.firstEmpty() == -1) {
-                player.sendMessage(Disenchantments.error("There are no more empty slots in your inventory."));
+                player.sendMessage(plugin.getLocaleEntry(6));
                 if (meta != null) item.setItemMeta(meta);
                 return true;
             }
 
             if (player.getGameMode() != GameMode.CREATIVE) {
                 if (!inventory.contains(Material.BOOK)) {
-                    sender.sendMessage(Disenchantments.error("You need " + num + " more book(s) in your inventory to disenchant this item."));
+                    sender.sendMessage(plugin.getLocaleEntry(7).replace("{0}", Integer.toString(num)));
                     if (meta != null) item.setItemMeta(meta);
                     return true;
                 }
 
-                ItemStack books = inventory.getItem(inventory.first(Material.BOOK));
+                ItemStack books = Objects.requireNonNull(inventory.getItem(inventory.first(Material.BOOK)));
                 books.setAmount(books.getAmount() - 1);
 
                 player.setLevel(player.getLevel() - (int) (entry.getValue() * plugin.getExperienceFactor()));
             }
 
             System.out.println(entry.getKey());
-            meta.removeEnchant(entry.getKey());
+            if (meta != null) meta.removeEnchant(entry.getKey());
             inventory.addItem(makeEnchantedBook(entry.getKey(), entry.getValue()));
             if (repairableMeta != null) repairableMeta.setRepairCost((repairableMeta.getRepairCost() - 1) / 2);
 
@@ -128,21 +139,22 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
 
         item.setItemMeta(meta);
 
-        player.sendMessage(Disenchantments.info("The item was disenchanted."));
+        player.sendMessage(plugin.getLocaleEntry(8));
 
         return true;
     }
 
     private boolean enchantmentDoesNotExist(Player player, String arg) {
-        player.sendMessage(Disenchantments.error("The specified enchantment \"" + arg + "\" does not exist."));
+        player.sendMessage(plugin.getLocaleEntry(9).replace("{0}", arg));
         return true;
     }
 
     private ItemStack makeEnchantedBook(Enchantment enchantment, int level) {
         ItemStack itemStack = new ItemStack(Material.ENCHANTED_BOOK);
-        EnchantmentStorageMeta enchantmentBookMeta = (EnchantmentStorageMeta) itemStack.getItemMeta();
+        EnchantmentStorageMeta enchantmentBookMeta = (EnchantmentStorageMeta)
+                Objects.requireNonNull(itemStack.getItemMeta());
 
-        enchantmentBookMeta.addStoredEnchant(enchantment, level, false);
+        enchantmentBookMeta.addStoredEnchant(enchantment, level, plugin.isIgnoreLevelRestriction());
 
         itemStack.setItemMeta(enchantmentBookMeta);
 
@@ -150,7 +162,8 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias,
+                                      String[] args) {
         if (args.length == 1 && args[0].equals("all")) {
             return Collections.emptyList();
         }

@@ -1,8 +1,13 @@
 package xyz.monology.disenchantments;
 
-import org.bukkit.command.*;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class DisenchantmentsCommand implements CommandExecutor, TabCompleter {
     private static final List<String> TAB_COMPLETIONS = new ArrayList<>();
@@ -18,22 +23,22 @@ public final class DisenchantmentsCommand implements CommandExecutor, TabComplet
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
+                             String[] args) {
         if (args.length == 1 && args[0].equals("reload")) {
             plugin.reloadConfig();
-            sender.sendMessage(Disenchantments.info("The configuration has been reloaded."));
+            sender.sendMessage(plugin.getLocaleEntry(10));
             return true;
         }
 
-        sender.sendMessage(Disenchantments.info("Disenchantments version 1.1"));
-        sender.sendMessage(Disenchantments.info("&f/disenchantments reload &7- Reloads the plugin configuration."));
-        sender.sendMessage(Disenchantments.info("&f/disenchant [enchantment] &7- Strips an enchantment from an item."));
+        sender.sendMessage(plugin.getLocaleEntry(11));
 
         return true;
     }
 
     @Override
-    public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias,
+                                      String[] args) {
         return TAB_COMPLETIONS;
     }
 }

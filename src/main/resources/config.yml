@@ -1,2 +1,18 @@
 experienceFactor: 1
 ignoreLevelRestriction: false
+locale:
+  invalidUsage: "&c[Disenchantments] &7Invalid usage: /disenchant [enchantments... | 'all']"
+  mustBePlayer: "&c[Disenchantments] &7You must be a player to execute this command."
+  mayNotDisenchantMcmmo: "&c[Disenchantments] &7You may not disenchant an item while using an mcMMO ability."
+  inventoryFull: "&c[Disenchantments] &7Your inventory is full."
+  missingEnchantment: "&c[Disenchantments] &7Your item does not have the {0} enchantment."
+  notEnoughExerience: "&c[Disenchantments] &7You do not have enough experience levels to disenchant your item. You need {0} more experience level(s)."
+  noEmptySlotsInventory: "&c[Disenchantments] &7There are no more empty slots in your inventory."
+  notEnoughBooks: "&c[Disenchantments] &7You need {0} more book(s) in your inventory to disenchant this item."
+  itemDisenchanted: "&9[Disenchantments] &7The item has been disenchanted."
+  nonexistantEnchantment: "&c[Disenchantments] &7The specified enchantment {0} does not exist."
+  configReloaded: "&9[Disenchantments] &7The configuration has been reloaded."
+  helpMessage:
+    - "&9[Disenchantments] &7Disenchantments version 1.1"
+    - "&9[Disenchantments] &f/disenchantments reload &7- Reloads the plugin configuration."
+    - "&9[Disenchantments] &f/disenchant [enchantment] &7- Strips an enchantment from an item."
