@@ -1,4 +1,4 @@
-package xyz.monology.disenchantments;
+package peterhenryd.disenchantments;
 
 import com.gmail.nossr50.api.AbilityAPI;
 import org.bukkit.GameMode;

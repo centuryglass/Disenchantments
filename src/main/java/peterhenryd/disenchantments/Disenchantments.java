@@ -1,4 +1,4 @@
-package xyz.monology.disenchantments;
+package peterhenryd.disenchantments;
 
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandExecutor;
