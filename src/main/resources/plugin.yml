@@ -2,8 +2,6 @@ name: Disenchantments
 version: 1.1
 main: peterhenryd.disenchantments.Disenchantments
 api-version: 1.16
-softdepend:
-  - mcMMO
 commands:
   disenchant:
     description: The command for disenchanting tools.

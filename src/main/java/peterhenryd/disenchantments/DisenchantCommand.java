@@ -1,6 +1,5 @@
 package peterhenryd.disenchantments;
 
-import com.gmail.nossr50.api.AbilityAPI;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
@@ -15,7 +14,6 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.Repairable;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -30,7 +28,7 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
+    public boolean onCommand(CommandSender sender, Command command, String label,
                              String[] args) {
         if (args.length < 1) {
             sender.sendMessage(plugin.getLocaleEntry(0));
@@ -44,12 +42,6 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
 
         Player player = (Player) sender;
         PlayerInventory inventory = player.getInventory();
-
-        if (plugin.getServer().getPluginManager().isPluginEnabled("mcMMO") &&
-                AbilityAPI.isAnyAbilityEnabled(player)) {
-            player.sendMessage(plugin.getLocaleEntry(2));
-            return true;
-        }
 
         if (inventory.firstEmpty() == -1) {
             sender.sendMessage(plugin.getLocaleEntry(3));
@@ -162,7 +154,7 @@ public final class DisenchantCommand implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias,
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
                                       String[] args) {
         if (args.length == 1 && args[0].equals("all")) {
             return Collections.emptyList();

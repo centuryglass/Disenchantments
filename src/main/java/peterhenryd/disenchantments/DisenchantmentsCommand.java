@@ -4,7 +4,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,7 @@ public final class DisenchantmentsCommand implements CommandExecutor, TabComplet
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label,
+    public boolean onCommand(CommandSender sender, Command command, String label,
                              String[] args) {
         if (args.length == 1 && args[0].equals("reload")) {
             plugin.reloadConfig();
@@ -37,7 +36,7 @@ public final class DisenchantmentsCommand implements CommandExecutor, TabComplet
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias,
+    public List<String> onTabComplete(CommandSender sender, Command command, String alias,
                                       String[] args) {
         return TAB_COMPLETIONS;
     }
